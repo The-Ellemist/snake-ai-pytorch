@@ -77,6 +77,8 @@ def train():
     record = 0
     agent = Agent()
     game = BangGame()
+    skip = 0
+    plc = False
     while True:
         # get old state
         state_old = agent.get_state(game, 1)
@@ -86,7 +88,19 @@ def train():
 
         # opponent move
         opponent_move = [0, 0, 0]
-        opponent_move[int(input(">>>"))] = 1
+        try:
+            if skip > 0:
+                skip -= 1
+                # this is on purpose
+                plc = False
+                a = 1 + "a"
+            else:
+                plc = True
+                opponent_move[int(input(">>>"))] = 1
+        except:
+            opponent_move[random.randint(0, 2)] = 1
+            if plc:
+                skip = 50
 
         # perform move and get new state
         reward, done, score = game.play_step(final_move, opponent_move)

@@ -29,12 +29,6 @@ class BangGame:
     def play_step(self, player_1_action, player_2_action):
         pri = self.number_of_games / 10 == int(self.number_of_games / 10)
         pri = True
-        if pri:
-            print(f"Player 1 shields: {self.player_1_shields}")
-            print(f"Player 1 reload: {self.player_1_reload}")
-            print(f"Player 2 shields: {self.player_2_shields}")
-            print(f"Player 2 reload: {self.player_2_reload}")
-            print()
         reward = 0
         gameover = False
         if player_1_action[1] == 1:
@@ -42,7 +36,7 @@ class BangGame:
                 print("Player 1 reloaded")
             self.player_1_reload = 1
             self.player_1_shields = 5
-            if player_2_action[0] == 1:
+            if player_2_action[0] == 1 and self.player_2_shields > 0:
                 if pri:
                     print("Player 2 shielded")
                 self.player_2_shields -= 1
@@ -59,11 +53,16 @@ class BangGame:
                     gameover = True
         elif player_1_action[0] == 1:
             if pri:
-                print("Player 1 shielded")
-            self.player_1_shields -= 1
+                if self.player_1_shields > 0:
+                    print("Player 1 shielded")
+                else:
+                    print("Player 1 tried to shield")
             if player_2_action[0] == 1:
                 if pri:
-                    print("Player 2 shielded")
+                    if self.player_2_shields > 0:
+                        print("Player 2 shielded")
+                    else:
+                        print("Player 2 tried to shield")
                 self.player_2_shields -= 1
             elif player_2_action[1] == 1:
                 if pri:
@@ -72,10 +71,20 @@ class BangGame:
                 self.player_2_shields = 5
             elif player_2_action[2] == 1:
                 if pri:
-                    print("Player 2 shot")
-                self.player_2_reload = 0
-                self.player_2_shields = 5
-                reward += 1
+                    if self.player_2_reload == 1:
+                        print("Player 2 shot")
+                    else:
+                        print("Player 2 tried to shoot")
+                if self.player_2_reload == 1:
+                    self.player_2_reload = 0
+                    self.player_2_shields = 5
+                    if not self.player_1_shields > 0:
+                        gameover = True
+                        reward -= 10
+                    else:
+                        reward += 1
+            if self.player_1_shields > 0:
+                self.player_1_shields -= 1
         elif player_1_action[2] == 1:
             if pri:
                 if self.player_1_reload == 1:
@@ -84,7 +93,10 @@ class BangGame:
                     print("Player 1 tried to shoot")
             if player_2_action[0] == 1:
                 if pri:
-                    print("Player 2 shielded")
+                    if self.player_2_shields > 0:
+                        print("Player 2 shielded")
+                    else:
+                        print("Player 2 tried to shield")
                 self.player_2_shields -= 1
             elif player_2_action[1] == 1:
                 if pri:
@@ -118,6 +130,12 @@ class BangGame:
                 self.player_1_reload = 0
             else:
                 reward -= 3
+        if pri:
+            print()
+            print(f"Player 1 shields: {self.player_1_shields}")
+            print(f"Player 1 reload: {self.player_1_reload}")
+            print(f"Player 2 shields: {self.player_2_shields}")
+            print(f"Player 2 reload: {self.player_2_reload}")
         if pri:
             print("-----------")
         if gameover:
