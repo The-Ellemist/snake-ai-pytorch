@@ -84,9 +84,12 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state):
+    def get_action(self, state, loaded):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 80 - self.n_games
+        if loaded == 0:
+            self.epsilon = 80 - self.n_games
+        else:
+            self.epsilon = 0
         final_move = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
@@ -100,19 +103,25 @@ class Agent:
         return final_move
 
 
+load = 0
+
+
 def train():
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
     record = 0
     agent = Agent()
+    if load == 1:
+        agent.model.load_state_dict(torch.load(f"./model/model_best.pth"))
+        agent.model.eval()
     game = SnakeGameAI()
     while True:
         # get old state
         state_old = agent.get_state(game)
 
         # get move
-        final_move = agent.get_action(state_old)
+        final_move = agent.get_action(state_old, load)
 
         # perform move and get new state
         reward, done, score = game.play_step(final_move)
